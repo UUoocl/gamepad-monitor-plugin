@@ -50,7 +50,8 @@ endif()
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 
-if(APPLE)
+# Skip Brew on CI to ensure we build a Universal (arm64+x86_64) binary from source
+if(APPLE AND NOT DEFINED ENV{CI})
   execute_process(COMMAND brew --prefix OUTPUT_VARIABLE BREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
   if(BREW_PREFIX AND EXISTS "${BREW_PREFIX}/include/SDL2")
     set(SDL2_INCLUDE_DIR "${BREW_PREFIX}/include/SDL2")
