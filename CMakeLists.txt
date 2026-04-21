@@ -60,6 +60,10 @@ if(APPLE AND NOT DEFINED ENV{CI})
 endif()
 
 if(NOT SDL2_INCLUDE_DIR)
+  set(SDL_WERROR OFF CACHE BOOL "" FORCE)
+  set(SDL_STATIC ON CACHE BOOL "" FORCE)
+  set(SDL_SHARED OFF CACHE BOOL "" FORCE)
+  
   FetchContent_Declare(
     SDL2
     URL https://github.com/libsdl-org/SDL/releases/download/release-2.30.2/SDL2-2.30.2.tar.gz
