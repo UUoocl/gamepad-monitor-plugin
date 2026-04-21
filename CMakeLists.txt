@@ -7,7 +7,7 @@ include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/common/bootstrap.cmake" NO_POLICY_SCO
 
 project(${_name} VERSION ${_version})
 
-if(APPLE)
+if(APPLE AND EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Frameworks")
   add_link_options("-F${CMAKE_CURRENT_SOURCE_DIR}/Frameworks")
 endif()
 
@@ -69,15 +69,12 @@ if(NOT SDL2_INCLUDE_DIR)
     URL https://github.com/libsdl-org/SDL/releases/download/release-2.30.2/SDL2-2.30.2.tar.gz
   )
   FetchContent_MakeAvailable(SDL2)
-  set(SDL2_INCLUDE_DIR "${sdl2_SOURCE_DIR}/include")
-  if(MSVC)
+  if(TARGET SDL2-static)
     set(SDL2_LIBRARY SDL2-static)
   else()
     set(SDL2_LIBRARY SDL2)
   endif()
 endif()
-
-include_directories(${SDL2_INCLUDE_DIR})
 
 target_sources(${CMAKE_PROJECT_NAME} PRIVATE 
   src/plugin-main.cpp
@@ -85,6 +82,11 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   src/gamepad-settings-dialog.cpp
   src/thirdparty/mongoose.c
 )
+
+# Use target-based includes if SDL2_INCLUDE_DIR isn't manually set (FetchContent case)
+if(SDL2_INCLUDE_DIR)
+  target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIR})
+endif()
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${SDL2_LIBRARY})
 
@@ -96,10 +98,24 @@ if(APPLE)
   find_library(IOKIT_LIBRARY IOKit)
   find_library(COREFOUNDATION_LIBRARY CoreFoundation)
   find_library(GAMECONTROLLER_LIBRARY GameController)
+  find_library(COREAUDIO_LIBRARY CoreAudio)
+  find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
+  find_library(FORCEFEEDBACK_LIBRARY ForceFeedback)
+  find_library(COREVIDEO_LIBRARY CoreVideo)
+  find_library(COCOA_LIBRARY Cocoa)
+  find_library(CARBON_LIBRARY Carbon)
+  find_library(METAL_LIBRARY Metal)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE 
     ${IOKIT_LIBRARY} 
     ${COREFOUNDATION_LIBRARY}
     ${GAMECONTROLLER_LIBRARY}
+    ${COREAUDIO_LIBRARY}
+    ${AUDIOTOOLBOX_LIBRARY}
+    ${FORCEFEEDBACK_LIBRARY}
+    ${COREVIDEO_LIBRARY}
+    ${COCOA_LIBRARY}
+    ${CARBON_LIBRARY}
+    ${METAL_LIBRARY}
   )
 endif()
 
