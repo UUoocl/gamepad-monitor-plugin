@@ -46,9 +46,31 @@ if(ENABLE_QT)
   )
 endif()
 
-# Use system SDL2 from Homebrew
-set(SDL2_INCLUDE_DIR "/opt/homebrew/include/SDL2")
-set(SDL2_LIBRARY "/opt/homebrew/lib/libSDL2.a")
+# Use system SDL2 if available, otherwise fetch it
+include(FetchContent)
+set(FETCHCONTENT_QUIET OFF)
+
+if(APPLE)
+  execute_process(COMMAND brew --prefix OUTPUT_VARIABLE BREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(BREW_PREFIX)
+    set(SDL2_INCLUDE_DIR "${BREW_PREFIX}/include/SDL2")
+    set(SDL2_LIBRARY "${BREW_PREFIX}/lib/libSDL2.a")
+  endif()
+endif()
+
+if(NOT SDL2_INCLUDE_DIR)
+  FetchContent_Declare(
+    SDL2
+    URL https://github.com/libsdl-org/SDL/releases/download/release-2.30.2/SDL2-2.30.2.tar.gz
+  )
+  FetchContent_MakeAvailable(SDL2)
+  set(SDL2_INCLUDE_DIR "${sdl2_SOURCE_DIR}/include")
+  if(MSVC)
+    set(SDL2_LIBRARY SDL2-static)
+  else()
+    set(SDL2_LIBRARY SDL2)
+  endif()
+endif()
 
 include_directories(${SDL2_INCLUDE_DIR})
 
@@ -60,6 +82,10 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
 )
 
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${SDL2_LIBRARY})
+
+if(WIN32)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE winmm imm32 version setupapi)
+endif()
 
 if(APPLE)
   find_library(IOKIT_LIBRARY IOKit)

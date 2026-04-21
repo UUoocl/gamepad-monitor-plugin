@@ -33,10 +33,10 @@ runs:
       run: |
         : Install Dependencies 🛍️
         echo ::group::Install Dependencies
-        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+        sudo apt-get update && sudo apt-get install -y zsh
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)" || true
         echo "/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin" >> $GITHUB_PATH
-        echo "/home/linuxbrew/.linuxbrew/opt/clang-format@19/bin" >> $GITHUB_PATH
-        brew install --quiet zsh
+        brew install --quiet zsh || true
         echo ::endgroup::
 
     - name: Run clang-format 🐉
