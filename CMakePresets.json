@@ -41,7 +41,6 @@
       "description": "Build for macOS 12.0+ (Universal binary) for CI",
       "generator": "Xcode",
       "cacheVariables": {
-        "CMAKE_COMPILE_WARNING_AS_ERROR": true,
         "ENABLE_CCACHE": true
       }
     },
@@ -65,9 +64,7 @@
       "inherits": ["windows-x64"],
       "displayName": "Windows x64 CI build",
       "description": "Build for Windows x64 on CI",
-      "cacheVariables": {
-        "CMAKE_COMPILE_WARNING_AS_ERROR": true
-      }
+      "cacheVariables": {}
     }
   ],
   "buildPresets": [

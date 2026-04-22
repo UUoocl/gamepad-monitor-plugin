@@ -71,18 +71,16 @@ if(NOT SDL2_INCLUDE_DIR)
   FetchContent_MakeAvailable(SDL2)
   if(TARGET SDL2-static)
     set(SDL2_LIBRARY SDL2-static)
-    if(NOT MSVC)
-      target_compile_options(SDL2-static PRIVATE -Wno-error)
-    else()
-      target_compile_options(SDL2-static PRIVATE /WX-)
-    endif()
+    target_compile_options(SDL2-static PRIVATE 
+      $<$<C_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-error -Wno-sign-compare>
+      $<$<C_COMPILER_ID:MSVC>:/WX- /wd4018 /wd4244 /wd4267>
+    )
   elseif(TARGET SDL2)
     set(SDL2_LIBRARY SDL2)
-    if(NOT MSVC)
-      target_compile_options(SDL2 PRIVATE -Wno-error)
-    else()
-      target_compile_options(SDL2 PRIVATE /WX-)
-    endif()
+    target_compile_options(SDL2 PRIVATE 
+      $<$<C_COMPILER_ID:Clang,AppleClang,GNU>:-Wno-error -Wno-sign-compare>
+      $<$<C_COMPILER_ID:MSVC>:/WX- /wd4018 /wd4244 /wd4267>
+    )
   endif()
 endif()
 
@@ -92,6 +90,14 @@ target_sources(${CMAKE_PROJECT_NAME} PRIVATE
   src/gamepad-settings-dialog.cpp
   src/thirdparty/mongoose.c
 )
+
+# Apply -Werror only to our own plugin target on CI
+if(DEFINED ENV{CI})
+  target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE 
+    $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-Werror>
+    $<$<CXX_COMPILER_ID:MSVC>:/WX>
+  )
+endif()
 
 # Use target-based includes if SDL2_INCLUDE_DIR isn't manually set (FetchContent case)
 if(SDL2_INCLUDE_DIR)
