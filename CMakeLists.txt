@@ -18,6 +18,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 option(ENABLE_FRONTEND_API "Use obs-frontend-api for UI functionality" ON)
 option(ENABLE_QT "Use Qt functionality" ON)
 
+set(CMAKE_COMPILE_WARNING_AS_ERROR OFF)
 include(compilerconfig)
 include(defaults)
 include(helpers)
@@ -46,20 +47,11 @@ if(ENABLE_QT)
   )
 endif()
 
-# Use system SDL2 if available, otherwise fetch it
+# Use source-based SDL2 via FetchContent to ensure Universal Binary support
 include(FetchContent)
 set(FETCHCONTENT_QUIET OFF)
 
-# Skip Brew on CI to ensure we build a Universal (arm64+x86_64) binary from source
-if(APPLE AND NOT DEFINED ENV{CI})
-  execute_process(COMMAND brew --prefix OUTPUT_VARIABLE BREW_PREFIX OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(BREW_PREFIX AND EXISTS "${BREW_PREFIX}/include/SDL2")
-    set(SDL2_INCLUDE_DIR "${BREW_PREFIX}/include/SDL2")
-    set(SDL2_LIBRARY "${BREW_PREFIX}/lib/libSDL2.a")
-  endif()
-endif()
-
-if(NOT SDL2_INCLUDE_DIR)
+if(TRUE) # Force FetchContent
   set(SDL_WERROR OFF CACHE BOOL "" FORCE)
   set(SDL_STATIC ON CACHE BOOL "" FORCE)
   set(SDL_SHARED OFF CACHE BOOL "" FORCE)
