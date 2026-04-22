@@ -68,7 +68,7 @@
       "cacheVariables": {
         "CMAKE_COMPILE_WARNING_AS_ERROR": true
       }
-    },
+    }
   ],
   "buildPresets": [
     {
@@ -98,6 +98,6 @@
       "displayName": "Windows x64 CI",
       "description": "Windows CI build for x64 (RelWithDebInfo configuration)",
       "configuration": "RelWithDebInfo"
-    },
+    }
   ]
 }
