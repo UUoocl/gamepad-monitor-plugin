@@ -20,14 +20,20 @@ void HandleGamepadToSignal(const std::string &alias, const std::string &jsonStri
 	if (sh) {
 		obs_data_t *packet = obs_data_create_from_json(jsonString.c_str());
 		if (packet) {
-			// Add 'a' field for routing if needed, though usually alias is enough
-			obs_data_set_string(packet, "a", alias.c_str());
+			obs_data_set_string(packet, "a", "gamepad_input");
 
-			calldata_t cd;
-			calldata_init(&cd);
+			calldata_t cd = {0};
 			calldata_set_ptr(&cd, "packet", packet);
+
+			// 1. Send to general 'gamepad' topic
+			obs_data_set_string(packet, "t", "gamepad");
 			signal_handler_signal(sh, "media_warp_transmit", &cd);
-			calldata_free(&cd);
+
+			// 2. Send to device-specific 'gamepad/[alias]' topic
+			std::string topic = "gamepad/" + alias;
+			obs_data_set_string(packet, "t", topic.c_str());
+			signal_handler_signal(sh, "media_warp_transmit", &cd);
+
 			obs_data_release(packet);
 		}
 	}

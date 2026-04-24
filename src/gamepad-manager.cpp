@@ -185,12 +185,24 @@ void GamepadManager::HandleControllerEvent(const SDL_Event& event) {
         }
 
         if (changed) {
+            if (loggingEnabled && logCallback) {
+                std::string detail;
+                if (event.type == SDL_CONTROLLERAXISMOTION) {
+                    std::stringstream ss;
+                    ss << "axis_" << event.caxis.axis << ": " << std::fixed << std::setprecision(3) << (event.caxis.value / 32767.0);
+                    detail = ss.str();
+                } else {
+                    detail = "btn_" + std::to_string(event.cbutton.button) + (event.cbutton.state == SDL_PRESSED ? ": pressed" : ": released");
+                }
+                logCallback("[" + dev->alias + "] " + detail);
+            }
             EmitState(dev);
         }
     }
 }
 
 void GamepadManager::EmitState(GamepadDevicePtr dev) {
+    if (!globalEnabled) return;
     obs_data_t* data = obs_data_create();
     obs_data_set_string(data, "type", "gamepad_input");
     obs_data_set_string(data, "alias", dev->alias.c_str());
@@ -248,6 +260,11 @@ void GamepadManager::LoadConfig() {
     bfree(configPath);
 
     if (data) {
+        autoStart = obs_data_get_bool(data, "auto_start");
+        globalEnabled = obs_data_get_bool(data, "global_enabled");
+        loggingEnabled = obs_data_get_bool(data, "logging_enabled");
+        logCollapsed = obs_data_get_bool(data, "log_collapsed");
+
         obs_data_array_t* devArray = obs_data_get_array(data, "devices");
         if (devArray) {
             std::lock_guard<std::recursive_mutex> lock(devicesMutex);
@@ -294,6 +311,11 @@ void GamepadManager::SaveConfig() {
     }
 
     obs_data_t* data = obs_data_create();
+    obs_data_set_bool(data, "auto_start", autoStart);
+    obs_data_set_bool(data, "global_enabled", globalEnabled);
+    obs_data_set_bool(data, "logging_enabled", loggingEnabled);
+    obs_data_set_bool(data, "log_collapsed", logCollapsed);
+
     obs_data_array_t* devArray = obs_data_array_create();
     
     std::lock_guard<std::recursive_mutex> lock(devicesMutex);

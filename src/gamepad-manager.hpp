@@ -49,6 +49,19 @@ public:
     using MessageCallback = std::function<void(const std::string& alias, const std::string& jsonString)>;
     void SetMessageCallback(MessageCallback cb) { messageCallback = cb; }
 
+    void SetAutoStart(bool enable) { autoStart = enable; }
+    bool GetAutoStart() const { return autoStart; }
+
+    void SetGlobalEnabled(bool enable) { globalEnabled = enable; }
+    bool IsGlobalEnabled() const { return globalEnabled; }
+
+    using LogCallback = std::function<void(const std::string& msg)>;
+    void SetLogCallback(LogCallback cb) { logCallback = cb; }
+    void EnableLogging(bool enable) { loggingEnabled = enable; }
+    bool IsLoggingEnabled() const { return loggingEnabled; }
+    void SetLogCollapsed(bool collapsed) { logCollapsed = collapsed; }
+    bool IsLogCollapsed() const { return logCollapsed; }
+
 private:
     void PollThread();
     void HandleControllerEvent(const SDL_Event& event);
@@ -60,7 +73,13 @@ private:
     std::atomic<bool> polling{false};
     std::thread pollThread;
     
+    bool autoStart = false;
+    bool globalEnabled = true;
+    bool loggingEnabled = false;
+    bool logCollapsed = false;
+
     MessageCallback messageCallback;
+    LogCallback logCallback;
 };
 
 GamepadManager& GetGamepadManager();
